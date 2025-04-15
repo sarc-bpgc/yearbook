@@ -8,8 +8,65 @@ import requests
 from io import BytesIO
 from PIL import Image
 import cv2
+import numpy as np
 
 register_heif_opener()
+
+# Load the pre-trained face cascade classifier
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+def detect_and_crop_face(img, desired_aspect_ratio):
+    # Convert PIL Image to OpenCV format
+    if isinstance(img, Image.Image):
+        img_cv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    else:
+        img_cv = img
+
+    # Convert to grayscale for face detection
+    gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+    
+    # Detect faces
+    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+    
+    if len(faces) > 0:
+        # Get the largest face (assuming it's the main subject)
+        largest_face = max(faces, key=lambda x: x[2] * x[3])
+        x, y, w, h = largest_face
+        
+        # Calculate face center
+        face_center_x = x + w//2
+        face_center_y = y + h//2
+        
+        # Calculate crop dimensions based on desired aspect ratio
+        img_height, img_width = img_cv.shape[:2]
+        
+        if img_width/img_height > desired_aspect_ratio:
+            new_width = int(img_height * desired_aspect_ratio)
+            # Center the crop window on the face
+            left = max(0, min(face_center_x - new_width//2, img_width - new_width))
+            crop_box = (left, 0, left + new_width, img_height)
+        else:
+            new_height = int(img_width / desired_aspect_ratio)
+            # Center the crop window on the face
+            top = max(0, min(face_center_y - new_height//2, img_height - new_height))
+            crop_box = (0, top, img_width, top + new_height)
+            
+        return crop_box
+    else:
+        # Fall back to center-based cropping if no face detected
+        img_aspect_ratio = img_width / img_height
+        if img_aspect_ratio > desired_aspect_ratio:
+            new_width = int(img_height * desired_aspect_ratio)
+            left_margin = (img_width - new_width) // 2
+            right_margin = img_width - new_width - left_margin
+            crop_box = (left_margin, 0, img_width - right_margin, img_height)
+        else:
+            new_height = int(img_width / desired_aspect_ratio)
+            top_margin = (img_height - new_height) // 4
+            bottom_margin = img_height - new_height - top_margin*3
+            crop_box = (0, top_margin, img_width, img_height - bottom_margin)
+        return crop_box
+
 df = pd.read_excel('test.xlsx')  
 # df=pd.read_ex('fix.csv')
 doc = Document()
@@ -117,20 +174,11 @@ for i in range(0, len(df), 3):
                 img = Image.open(image_data)
                 
                 desired_aspect_ratio = 1/ratio
-                img_aspect_ratio = img.width / img.height
-
-                if img_aspect_ratio > desired_aspect_ratio:
-                    new_width = int(img.height * desired_aspect_ratio)
-                    left_margin = (img.width - new_width) // 2
-                    right_margin = img.width - new_width - left_margin
-                    crop_box = (left_margin, 0, img.width - right_margin, img.height)
-                else:
-                    new_height = int(img.width / desired_aspect_ratio)
-                    top_margin = (img.height - new_height) // 4
-                    bottom_margin = img.height - new_height - top_margin*3
-                    crop_box = (0, top_margin, img.width, img.height - bottom_margin)
-
+                
+                # Use face detection to determine crop box
+                crop_box = detect_and_crop_face(img, desired_aspect_ratio)
                 cropped_img = img.crop(crop_box)
+                
                 new_width = img.width
                 new_height = int(new_width * ratio)
 
@@ -176,4 +224,4 @@ for i in range(0, len(df), 3):
               
                    
 # 1/0.95
-doc.save('fnFin1.docx')
+doc.save('facedetec.docx')
