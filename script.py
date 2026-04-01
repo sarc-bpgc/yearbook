@@ -45,7 +45,7 @@ COL_PHOTO  = 'Upload a clear, well-lit, decent photo (1:1 ratio or passport size
 
 # --- Default fallback values ---
 DEFAULT_QUOTE     = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
-DEFAULT_PHOTO_URL = 'https://drive.google.com/file/d/1dxSlFP84x_jJbAH2SJMjOrwW_S87b6iy/view?usp=sharing'
+DEFAULT_PHOTO_URL = 'https://drive.google.com/file/d/null/view?usp=sharing'
 
 # --- Grid layout ---
 COLS_PER_PAGE = 3       # Number of columns in the grid
