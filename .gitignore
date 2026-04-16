@@ -1,2 +1,27 @@
-*.xlsx
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+
+# Project Specific
 *.pdf
+*.xlsx
+photo_cache/
+.DS_Store
+"*:Zone.Identifier"
+
+# Data Folders
+"Main Data/"
+"final data/"
+"sample data/"
+"new sample data/"
+
+# Large files protection
+*.log

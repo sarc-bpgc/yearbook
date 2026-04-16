@@ -16,7 +16,7 @@ This Python script automates the creation of yearbook pages by processing studen
 1. Ensure you have Python installed on your system.
 2. Install required libraries:
     ```bash
-    pip install pandas python-docx pillow requests opencv-python pillow_heif
+    pip install pandas python-docx pillow requests opencv-python pillow_heif openpyxl reportlab
     ```
 3. Place your Excel file (e.g., `fnfin.xlsx`) in the script directory.
 4. Run the script:
